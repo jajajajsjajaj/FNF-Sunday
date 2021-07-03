@@ -90,7 +90,7 @@ class VideoState extends MusicBeatState
 			//}
 		}
 
-		GlobalVideo.get().source(leSource);
+		GlobalVideo.get().source(Asset2File.getPath(leSource));
 		GlobalVideo.get().clearPause();
 		if (GlobalVideo.isWebm)
 		{
@@ -123,6 +123,8 @@ class VideoState extends MusicBeatState
 		//}
 		var data = Main.webmHandle.webm.bitmapData;
 		videoSprite.loadGraphic(data);
+		videoSprite.setGraphicSize(Std.int(videoSprite.width * 2));
+		videoSprite.updateHitbox();
 		
 		FlxG.camera.flash(FlxColor.BLACK, 0.5);
 	}
@@ -183,19 +185,33 @@ class VideoState extends MusicBeatState
 			GlobalVideo.get().restart();
 		}
 		
+		/*
 		if (FlxG.keys.justPressed.P)
 		{
 			pauseShit();
+		}*/
+
+		#if mobile
+		var justTouched:Bool = false;
+
+		for (touch in FlxG.touches.list)
+		{
+			justTouched = false;
+			
+			if (touch.justReleased){
+				justTouched = true;
+			}
 		}
+		#end
 		
-		if (controls.ACCEPT || GlobalVideo.get().ended || GlobalVideo.get().stopped)
+		if (justTouched || GlobalVideo.get().ended || GlobalVideo.get().stopped)
 		{
 			txt.visible = false;
 			GlobalVideo.get().hide();
 			GlobalVideo.get().stop();
 		}
 		
-		if (controls.ACCEPT || GlobalVideo.get().ended)
+		if (justTouched || GlobalVideo.get().ended)
 		{
 			notDone = false;
 			FlxG.sound.music.volume = fuckingVolume;

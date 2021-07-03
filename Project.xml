@@ -2,8 +2,8 @@
 <project>
 	<!-- _________________________ Application Settings _________________________ -->
 
-	<app title="Friday Night Funkin': Kade Engine" file="Vs Sunday WITH SHADERS" packageName="com.kadedev.kadeengine" package="com.kadedev.kadeengine" main="Main" version="0.2.7.1" company="kadedev" if="shaders" />
-	<app title="Friday Night Funkin': Kade Engine WITHOUT SHADERS" file="Vs Sunday" packageName="com.kadedev.kadeengine" package="com.kadedev.kadeengine" main="Main" version="0.2.7.1" company="kadedev" unless="shaders" />
+	<app title="Friday Night Funkin': Kade Engine" file="Vs Sunday WITH SHADERS" packageName="com.kadedev.sunday" package="com.kadedev.sunday" main="Main" version="0.2.7.1" company="kadedev" if="shaders" />
+	<app title="Friday Night Funkin': Kade Engine WITHOUT SHADERS" file="Vs Sunday" packageName="com.kadedev.sunday" package="com.kadedev.sunday" main="Main" version="0.2.7.1" company="kadedev" unless="shaders" />
 
 	<!--Switch Export with Unique ApplicationID and Icon-->
 	<set name="APP_ID" value="0x0100f6c013bbc000" />
@@ -29,7 +29,7 @@
 
 	<!--Mobile-specific-->
 	<window if="mobile" orientation="landscape" fullscreen="true" width="0" height="0" resizable="false"/>
-
+	<define name="mobileC" if="mobile" />
 	<!--Switch-specific-->
 	<window if="switch" orientation="landscape" fullscreen="true" width="0" height="0" resizable="true" />
 
@@ -40,6 +40,8 @@
 	<set name="BUILD_DIR" value="export_sunday/32bit" if="32bit" />
 
 	<classpath name="source_sunday" />
+
+	<assets path="assets/shared/images/hitbox"/>
 
 	<assets path="assets/preload" rename="assets" exclude="*.ogg" if="web"/>
 	<assets path="assets/preload" rename="assets" exclude="*.mp3" unless="web"/>
@@ -102,7 +104,7 @@
 
 	<!--In case you want to use the ui package-->
 	<haxelib name="flixel-ui" />
-	<haxelib name="newgrounds"/>
+	<haxelib name="newgrounds" unless="mobile" />
 	<haxelib name="faxe" if='switch'/>
 	<haxelib name="polymod"/>
 	<haxelib name="discord_rpc" if="windows"/>

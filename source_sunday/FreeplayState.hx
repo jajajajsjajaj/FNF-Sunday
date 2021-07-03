@@ -196,6 +196,10 @@ class FreeplayState extends MusicBeatState
 		 //var flxShit:FlxSprite = new FlxSprite().loadGraphic("WHORESHIT");
 		// add(flxShit);
 		// flxShit.scrollFactor.set();
+
+		#if mobileC
+		addVirtualPad(FULL, A_B);
+		#end
 		 
 		super.create();
 	}

@@ -62,6 +62,7 @@ import haxe.Json;
 import lime.utils.Assets;
 import openfl.display.BlendMode;
 import openfl.display.StageQuality;
+import ui.Mobilecontrols;
 
 #if shaders
 import openfl.filters.ShaderFilter;
@@ -250,6 +251,10 @@ class PlayState extends MusicBeatState
 
 	private var executeModchart = false;
 	var ch = 2 / 1000;
+
+	#if mobileC
+	var mcontrols:Mobilecontrols; 
+	#end
 
 	// API stuff
 	
@@ -1199,6 +1204,29 @@ class PlayState extends MusicBeatState
 		if (loadRep)
 			replayTxt.cameras = [camHUD];
 
+		#if mobileC
+			mcontrols = new Mobilecontrols();
+			switch (mcontrols.mode)
+			{
+				case VIRTUALPAD_RIGHT | VIRTUALPAD_LEFT | VIRTUALPAD_CUSTOM:
+					controls.setVirtualPad(mcontrols._virtualPad, FULL, NONE);
+				case HITBOX:
+					controls.setHitBox(mcontrols._hitbox);
+				default:
+			}
+			trackedinputs = controls.trackedinputs;
+			controls.trackedinputs = [];
+
+			var camcontrol = new FlxCamera();
+			FlxG.cameras.add(camcontrol);
+			camcontrol.bgColor.alpha = 0;
+			mcontrols.cameras = [camcontrol];
+
+			mcontrols.visible = false;
+
+			add(mcontrols);
+		#end
+
 		// if (SONG.song == 'South')
 		// FlxG.camera.alpha = 0.7;
 		// UI_camera.zoom = 1;
@@ -1368,6 +1396,10 @@ class PlayState extends MusicBeatState
 
 	function startCountdown():Void
 	{
+		#if mobileC
+		mcontrols.visible = true;
+		#end
+
 		inCutscene = false;
 
 		generateStaticArrows(0,SONG.noteStyle);
@@ -2271,7 +2303,7 @@ class PlayState extends MusicBeatState
 		#end
 		
 		scoreTxt.text = Ratings.CalculateRanking(songScore,songScoreDef,nps,maxNPS,accuracy);
-		if (FlxG.keys.justPressed.ENTER && startedCountdown && canPause)
+		if (FlxG.keys.justPressed.ENTER  #if android || FlxG.android.justReleased.BACK #end  && startedCountdown && canPause)
 		{
 			persistentUpdate = false;
 			persistentDraw = true;
@@ -2909,6 +2941,9 @@ class PlayState extends MusicBeatState
 
 	function endSong():Void
 	{
+		#if mobileC
+		mcontrols.visible = false;
+		#end
 		
 		FlxG.stage.removeEventListener(KeyboardEvent.KEY_DOWN,handleInput);
 		FlxG.stage.removeEventListener(KeyboardEvent.KEY_UP,releaseInput);
@@ -2924,7 +2959,7 @@ class PlayState extends MusicBeatState
 			campaignMisses = misses;
 
 		if (!loadRep)
-			rep.SaveReplay(saveNotes, saveJudge, replayAna);
+			trace('hi');
 		else
 		{
 			FlxG.save.data.botplay = false;
@@ -2990,7 +3025,6 @@ class PlayState extends MusicBeatState
 
 					if (SONG.validScore)
 					{
-						NGio.unlockMedal(60961);
 						Highscore.saveWeekScore(storyWeek, campaignScore, storyDifficulty);
 					}
 
@@ -3378,22 +3412,22 @@ class PlayState extends MusicBeatState
 //=======
 //>>>>>>> Stashed changes
 				// Prevent player input if botplay is on
-				if(FlxG.save.data.botplay)
+				/*if(FlxG.save.data.botplay)
 				{
 					holdArray = [false, false, false, false];
 					pressArray = [false, false, false, false];
 					releaseArray = [false, false, false, false];
-				} 
+				} */
 
-				#if !cpp
+				//#if !cpp
 				nonCpp = true;
-				#end
+				//#end
 
 				var anas:Array<Ana> = [null,null,null,null];
 
-				/*for (i in 0...pressArray.length)
+				for (i in 0...pressArray.length)
 					if (pressArray[i])
-						anas[i] = new Ana(Conductor.songPosition, null, false, "miss", i);*/
+						anas[i] = new Ana(Conductor.songPosition, null, false, "miss", i);
 
 				// HOLDS, check for sustain notes
 				if (holdArray.contains(true) && /*!boyfriend.stunned && */ generatedMusic)
@@ -3416,10 +3450,8 @@ class PlayState extends MusicBeatState
 					var directionsAccounted:Array<Bool> = [false, false, false, false];
 					
 					notes.forEachAlive(function(daNote:Note)
-					{
-						if (daNote.canBeHit && daNote.mustPress && !daNote.tooLate && !daNote.wasGoodHit)
 						{
-							if (directionList.contains(daNote.noteData))
+							if (daNote.canBeHit && daNote.mustPress && !daNote.tooLate && !daNote.wasGoodHit && !directionsAccounted[daNote.noteData])
 							{
 								if (directionList.contains(daNote.noteData))
 									{
@@ -3446,7 +3478,6 @@ class PlayState extends MusicBeatState
 										directionList.push(daNote.noteData);
 									}
 							}
-						}
 					});
 
 					//trace('notes that can be hit: ' + possibleNotes.length);
@@ -3460,6 +3491,7 @@ class PlayState extends MusicBeatState
 		 
 					possibleNotes.sort((a, b) -> Std.int(a.strumTime - b.strumTime));
 
+					//trace('pre cool');
 					if (perfectMode)
 						goodNoteHit(possibleNotes[0]);
 					else if (possibleNotes.length > 0)
@@ -3472,8 +3504,11 @@ class PlayState extends MusicBeatState
 										noteMiss(shit, null);
 								}
 						}
+						//trace('cool');
 						for (coolNote in possibleNotes)
 						{
+							trace('notedata :     ${coolNote.noteData}');
+							trace('pressarray :  ${pressArray}');
 							if (pressArray[coolNote.noteData])
 							{
 								if (mashViolations != 0)
