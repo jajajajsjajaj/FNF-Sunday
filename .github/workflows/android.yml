@@ -142,4 +142,4 @@ jobs:
 
           name: Android Build
 
-          path: export/release/android/bin/app/build/outputs/apk/debug
+          path: export/release/android/sdcard/Download
